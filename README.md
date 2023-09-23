@@ -1,28 +1,7 @@
-# Accelerating Reinforcement Learning with Learned Skill Priors
-#### [[Project Website]](https://clvrai.github.io/spirl/) [[Paper]](https://arxiv.org/abs/2010.11944)
+# Accelerating Reinforcement Learning with Codebook and Prior
 
-[Karl Pertsch](https://kpertsch.github.io/)<sup>1</sup>, [Youngwoon Lee](https://youngwoon.github.io/)<sup>1</sup>, 
-[Joseph Lim](https://www.clvrai.com/)<sup>1</sup>
-
-<sup>1</sup>CLVR Lab, University of Southern California 
-
-<a href="https://clvrai.github.io/spirl/">
-<p align="center">
-<img src="docs/resources/spirl_teaser.png" width="800">
-</p>
-</img></a>
-
-This is the official PyTorch implementation of the paper "**Accelerating Reinforcement Learning with Learned Skill Priors**"
-(CoRL 2020).
-
-## Updates
-- **[Feb 2022]**: added [pre-trained models](spirl/data/pretrained_models.md) for kitchen and maze environments
-- **[Jul 2021]**: added robotic office cleanup environment 
-(see [details & installation here](spirl/data/office/README.md))
-- **[Apr 2021]**: extended improved SPiRL version to support image-based observations 
-(see [example commands](spirl/configs/skill_prior_learning/block_stacking/hierarchical_cl/README.md))
-- **[Mar 2021]**: added an improved version of SPiRL with closed-loop skill decoder 
-(see [example commands](spirl/configs/skill_prior_learning/kitchen/hierarchical_cl/README.md))
+## Acknowledgements
+The model architecture and training code builds on a code base on [spirl](https://github.com/clvrai/spirl).
 
 ## Requirements
 
@@ -34,7 +13,7 @@ This is the official PyTorch implementation of the paper "**Accelerating Reinfor
 
 Create a virtual environment and install all required packages.
 ```
-cd spirl
+cd codebook4spirl
 pip3 install virtualenv
 virtualenv -p $(which python3) ./venv
 source ./venv/bin/activate
@@ -52,7 +31,7 @@ export EXP_DIR=./experiments
 export DATA_DIR=./data
 ```
 
-Finally, install **our fork** of the [D4RL benchmark](https://github.com/kpertsch/d4rl) repository by following its installation instructions.
+Finally, install **spirl'sfork** of the [D4RL benchmark](https://github.com/kpertsch/d4rl) repository by following its installation instructions.
 It will provide both, the kitchen environment as well as the training data for the skill prior model in kitchen and maze environment.
 
 ## Example Commands
@@ -60,52 +39,25 @@ All results will be written to [WandB](https://www.wandb.com/). Before running a
 create an account and then change the WandB entity and project name at the top of [train.py](spirl/train.py) and
 [rl/train.py](spirl/rl/train.py) to match your account.
 
-To train a skill prior model for the kitchen environment, run:
-```
-python3 spirl/train.py --path=spirl/configs/skill_prior_learning/kitchen/hierarchical_cl --val_data_size=160
-```
-**Note**: You can skip this step by downloading our pre-trained skill prior models -- see [instructions here](spirl/data/pretrained_models.md).
+First you need to generate codebook using [generate_codebook.py](generate_codebook.py), codebook will be put at [spirl/codebook](spirl/codebook).You can adjust codebook size and code dim in [generate_codebook.py](generate_codebook.py), default parameter is 50 code in codebook and 21 dim for each code.
 
-For training a SPIRL agent on the kitchen environment using the pre-trained skill prior from above, run:
+Then to train a prior model, run:
 ```
-python3 spirl/rl/train.py --path=spirl/configs/hrl/kitchen/spirl_cl --seed=0 --prefix=SPIRL_kitchen_seed0
+python3 spirl/train.py --path=spirl/configs/mc/kitchen/prior --val_data_size=160
 ```
+The config is at [spirl/configs/mc/kitchen/prior/conf.py](spirl/configs/mc/kitchen/prior/conf.py). To match the codebook size, you should adjust codebook path, and `action_dim` of `data_spec_prior` in [spirl/configs/default_data_configs/kitchen.py][spirl/configs/default_data_configs/kitchen.py]
 
-In both commands, `kitchen` can be replaced with `maze / block_stacking` to run on the respective environment. Before training models
-on these environments, the corresponding datasets need to be downloaded (the kitchen dataset gets downloaded automatically) 
--- download links are provided below.
-Additional commands for training baseline models / agents are also provided below. 
+To train a low level policy (predict $a$ using $s$ and $g$), run:
+```
+python3 spirl/train.py --path=spirl/configs/mc/kitchen/steve --val_data_size=160
+```
+Default state dim is 60, action dim is 9 and goal dim is 21 (size of code in codebook). The config is at [spirl/configs/mc/kitchen/steve/conf.py](spirl/configs/mc/kitchen/steve/conf.py)
 
-### Baseline Commands
-
-- Train **Single-step action prior**:
+Finally for RL training, run:
 ```
-python3 spirl/train.py --path=spirl/configs/skill_prior_learning/kitchen/flat --val_data_size=160
+python3 spirl/rl/train.py --path=spirl/configs/hrl/kitchen/steve --seed=0 --prefix=SPIRL_kitchen_seed0
 ```
-
-- Run **Vanilla SAC**:
-```
-python3 spirl/rl/train.py --path=spirl/configs/rl/kitchen/SAC --seed=0 --prefix=SAC_kitchen_seed0
-```
-
-- Run **SAC w/ single-step action prior**:
-```
-python3 spirl/rl/train.py --path=spirl/configs/rl/kitchen/prior_initialized/flat_prior/ --seed=0 --prefix=flatPrior_kitchen_seed0
-```
-
-- Run **BC + finetune**:
-```
-python3 spirl/rl/train.py --path=spirl/configs/rl/kitchen/prior_initialized/bc_finetune/ --seed=0 --prefix=bcFinetune_kitchen_seed0
-```
-
-- Run **Skill Space Policy w/o prior**:
-```
-python3 spirl/rl/train.py --path=spirl/configs/hrl/kitchen/no_prior/ --seed=0 --prefix=SSP_noPrior_kitchen_seed0
-```
-
-Again, all commands can be run on `maze / block stacking` by replacing `kitchen` with the respective environment in the paths
-(after downloading the datasets).
-
+Don't forget change codebook path in `get_codebook` in [spirl/data/kitchen/src/kitchen_data_loader.py](spirl/data/kitchen/src/kitchen_data_loader.py).
 
 ## Starting to Modify the Code
 
@@ -163,7 +115,7 @@ The core RL algorithms are implemented within the `Agent` class. For adding a ne
 networks (actor, critic etc) need to be constructed and the `update(...)` function needs to be overwritten. For an example, 
 see the SAC implementation in [```SACAgent```](spirl/rl/agents/ac_agent.py#L67).
 
-The main SPIRL skill prior regularized RL algorithm is implemented in [```ActionPriorSACAgent```](spirl/rl/agents/prior_sac_agent.py#L12).
+The main codebook prior regularized RL algorithm is implemented in [```CodebookBasedActionPriorSACAgent```](spirl/rl/agents/prior_sac_agent.py).
 
 
 ## Detailed Code Structure Overview
@@ -181,7 +133,9 @@ spirl
   |- configs               # all experiment configs should be placed here
   |    |- data_collect     # configs for data collection runs
   |    |- default_data_configs   # defines one default data config per dataset, e.g. state/action dim etc
+  |    |- mc               # configs for our prior model and low-level policy
   |    |- hrl              # configs for hierarchical downstream RL
+  |    |    |- steve       # configs for our method
   |    |- rl               # configs for non-hierarchical downstream RL
   |    |- skill_prior_learning   # configs for skill embedding and prior training (both hierarchical and flat)
   |
@@ -210,40 +164,6 @@ spirl
 
 The general philosophy is that each new experiment gets a new config file that captures all hyperparameters etc. so that experiments
 themselves are version controllable.
-
-## Datasets
-
-|Dataset        | Link         | Size |
-|:------------- |:-------------|:-----|
-| Maze | [https://drive.google.com/file/d/1pXM-EDCwFrfgUjxITBsR48FqW9gMoXYZ/view?usp=sharing](https://drive.google.com/file/d/1pXM-EDCwFrfgUjxITBsR48FqW9gMoXYZ/view?usp=sharing) | 12GB |
-| Block Stacking |[https://drive.google.com/file/d/1VobNYJQw_Uwax0kbFG7KOXTgv6ja2s1M/view?usp=sharing](https://drive.google.com/file/d/1VobNYJQw_Uwax0kbFG7KOXTgv6ja2s1M/view?usp=sharing)| 11GB|
-| Office Cleanup | [https://drive.google.com/file/d/1yNsTZkefMMvdbIBe-dTHJxgPIRXyxzb7/view?usp=sharing](https://drive.google.com/file/d/1yNsTZkefMMvdbIBe-dTHJxgPIRXyxzb7/view?usp=sharing)| 170MB |
-
-You can download the datasets used for the experiments in the paper with the links above. 
-To download the data via the command line, see example commands [here](spirl/data/).
-
-If you want to generate more data 
-or make other modifications to the data generating procedure, we provide instructions for regenerating the 
-`maze`, `block stacking` and `office` datasets [here](spirl/data/).
-
-
-## Citation
-If you find this work useful in your research, please consider citing:
-```
-@inproceedings{pertsch2020spirl,
-    title={Accelerating Reinforcement Learning with Learned Skill Priors},
-    author={Karl Pertsch and Youngwoon Lee and Joseph J. Lim},
-    booktitle={Conference on Robot Learning (CoRL)},
-    year={2020},
-}
-```
-
-## Acknowledgements
-The model architecture and training code builds on a code base which we jointly developed with [Oleh Rybkin](https://www.seas.upenn.edu/~oleh/) for our previous project on [hierarchial prediction](https://github.com/orybkin/video-gcp).
-
-We also published many of the utils / architectural building blocks in a stand-alone package for easy import into your 
-own research projects: check out the [blox](https://github.com/orybkin/blox-nn) python module. 
-
 
 ## Troubleshooting
 
