@@ -1,0 +1,27 @@
+2023-09-14 20:34:00,439 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Current SDK version is 0.15.10
+2023-09-14 20:34:00,439 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Configure stats pid to 1259
+2023-09-14 20:34:00,439 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Loading settings from /home/yhq/.config/wandb/settings
+2023-09-14 20:34:00,439 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Loading settings from /home/yhq/Desktop/spirl-master/spirl/wandb/settings
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'train.py', 'program': 'train.py'}
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:_log_setup():524] Logging user logs to spirl/mc/kitchen/prior/wandb/run-20230914_203400-prior/logs/debug.log
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:_log_setup():525] Logging internal logs to spirl/mc/kitchen/prior/wandb/run-20230914_203400-prior/logs/debug-internal.log
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:init():564] calling init triggers
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:init():571] wandb.init called with sweep_config: {}
+config: {'exp_dir': 'spirl', 'conf_path': 'configs/mc/kitchen/prior/conf.py', 'general_data_dir': '.', 'general_epoch_cycles_train': 10, 'model_state_dim': 60, 'model_action_dim': 100, 'model_n_layers': 5, 'model_hidden_size': 128, 'model_batch_size': 128, 'model_n_actions': 100, 'model_env_name': 'kitchen-mixed-v0', 'model_res': 128, 'model_crop_rand_subseq': True, 'model_subseq_len': 2, 'model_min_subseq_len': 10, 'model_max_subseq_len': 30, 'model_codebook_dir': 'codebook/codebook.pickle', 'model_device': 'cuda', 'data_dataset_spec_n_actions': 100, 'data_dataset_spec_state_dim': 60, 'data_dataset_spec_env_name': 'kitchen-mixed-v0', 'data_dataset_spec_res': 128, 'data_dataset_spec_crop_rand_subseq': True, 'data_dataset_spec_subseq_len': 2, 'data_dataset_spec_min_subseq_len': 10, 'data_dataset_spec_max_subseq_len': 30, 'data_dataset_spec_codebook_dir': 'codebook/codebook.pickle', 'data_device': 'cuda', 'ckpt_path': None}
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:init():614] starting backend
+2023-09-14 20:34:00,440 INFO    MainThread:1259 [wandb_init.py:init():618] setting up manager
+2023-09-14 20:34:00,448 INFO    MainThread:1259 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-09-14 20:34:00,450 INFO    MainThread:1259 [wandb_init.py:init():624] backend started and connected
+2023-09-14 20:34:00,461 INFO    MainThread:1259 [wandb_init.py:init():715] updated telemetry
+2023-09-14 20:34:00,461 INFO    MainThread:1259 [wandb_init.py:init():748] communicating run to backend with 90.0 second timeout
+2023-09-14 20:34:02,162 INFO    MainThread:1259 [wandb_init.py:init():791] run resumed
+2023-09-14 20:34:02,188 INFO    MainThread:1259 [wandb_run.py:_on_init():2220] communicating current version
+2023-09-14 20:34:03,301 INFO    MainThread:1259 [wandb_run.py:_on_init():2229] got version response 
+2023-09-14 20:34:03,301 INFO    MainThread:1259 [wandb_init.py:init():799] starting run threads in backend
+2023-09-14 20:34:03,345 INFO    MainThread:1259 [wandb_run.py:_console_start():2199] atexit reg
+2023-09-14 20:34:03,346 INFO    MainThread:1259 [wandb_run.py:_redirect():2054] redirect: wrap_raw
+2023-09-14 20:34:03,346 INFO    MainThread:1259 [wandb_run.py:_redirect():2119] Wrapping output streams.
+2023-09-14 20:34:03,346 INFO    MainThread:1259 [wandb_run.py:_redirect():2144] Redirects installed.
+2023-09-14 20:34:03,347 INFO    MainThread:1259 [wandb_init.py:init():840] run started, returning control to user process

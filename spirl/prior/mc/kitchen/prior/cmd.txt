@@ -1,0 +1,2 @@
+python train.py --path=configs/mc/kitchen/prior --val_data_size=160
+

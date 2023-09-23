@@ -1,0 +1,125 @@
+{
+    "os": "Linux-5.4.0-150-generic-x86_64-with-glibc2.17",
+    "python": "3.8.18",
+    "heartbeatAt": "2023-09-15T02:53:40.353557",
+    "startedAt": "2023-09-15T02:53:38.021756",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--path=configs/mc/kitchen/prior",
+        "--val_data_size=160"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePathLocal": "train.py",
+    "codePath": "train.py",
+    "host": "Precision-Tower-7910",
+    "username": "yhq",
+    "executable": "/home/yhq/anaconda3/envs/spirl/bin/python3",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 1363.3877499999999,
+        "min": 1200.0,
+        "max": 3000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1755.033,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1197.455,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1757.566,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1197.534,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1197.868,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1275.369,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1295.355,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1326.402,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1621.152,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1198.657,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1713.79,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1197.498,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1197.188,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1314.156,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1222.752,
+            "min": 1200.0,
+            "max": 3000.0
+        },
+        {
+            "current": 1346.429,
+            "min": 1200.0,
+            "max": 3000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 116.81114196777344,
+            "used": 109.54858779907227
+        }
+    },
+    "gpu": "NVIDIA TITAN Xp",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA TITAN Xp",
+            "memory_total": 12884901888
+        }
+    ],
+    "memory": {
+        "total": 62.73543167114258
+    }
+}

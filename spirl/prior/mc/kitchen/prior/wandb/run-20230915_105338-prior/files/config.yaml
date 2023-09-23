@@ -1,0 +1,115 @@
+wandb_version: 1
+
+exp_dir:
+  desc: null
+  value: prior
+conf_path:
+  desc: null
+  value: configs/mc/kitchen/prior/conf.py
+general_data_dir:
+  desc: null
+  value: .
+general_epoch_cycles_train:
+  desc: null
+  value: 10
+model_state_dim:
+  desc: null
+  value: 60
+model_action_dim:
+  desc: null
+  value: 100
+model_n_layers:
+  desc: null
+  value: 5
+model_hidden_size:
+  desc: null
+  value: 128
+model_batch_size:
+  desc: null
+  value: 128
+model_n_actions:
+  desc: null
+  value: 100
+model_env_name:
+  desc: null
+  value: kitchen-mixed-v0
+model_res:
+  desc: null
+  value: 128
+model_crop_rand_subseq:
+  desc: null
+  value: true
+model_subseq_len:
+  desc: null
+  value: 2
+model_min_subseq_len:
+  desc: null
+  value: 10
+model_max_subseq_len:
+  desc: null
+  value: 30
+model_codebook_dir:
+  desc: null
+  value: codebook/codebook.pickle
+model_device:
+  desc: null
+  value: cuda
+data_dataset_spec_n_actions:
+  desc: null
+  value: 100
+data_dataset_spec_state_dim:
+  desc: null
+  value: 60
+data_dataset_spec_env_name:
+  desc: null
+  value: kitchen-mixed-v0
+data_dataset_spec_res:
+  desc: null
+  value: 128
+data_dataset_spec_crop_rand_subseq:
+  desc: null
+  value: true
+data_dataset_spec_subseq_len:
+  desc: null
+  value: 2
+data_dataset_spec_min_subseq_len:
+  desc: null
+  value: 10
+data_dataset_spec_max_subseq_len:
+  desc: null
+  value: 30
+data_dataset_spec_codebook_dir:
+  desc: null
+  value: codebook/codebook.pickle
+data_device:
+  desc: null
+  value: cuda
+ckpt_path:
+  desc: null
+  value: null
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.18
+    cli_version: 0.15.10
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1694746418.034803
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 16
+      - 23
+      4: 3.8.18
+      5: 0.15.10
+      8:
+      - 2
+      - 5
