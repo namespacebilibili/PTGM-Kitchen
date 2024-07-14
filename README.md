@@ -1,6 +1,8 @@
-# Accelerating Reinforcement Learning with Codebook and Prior
+# Pre-Training Goal-based Models for Sample-Efficient Reinforcement Learning
 
-## Acknowledgements
+[[Project Website]](https://sites.google.com/view/ptgm-iclr/)[[Paper]](https://openreview.net/forum?id=o2IEmeLL9r)
+
+This is the code base for experiments in the `Kitchen` env for our paper [Pre-Training Goal-based Models for Sample-Efficient Reinforcement Learning](https://openreview.net/forum?id=o2IEmeLL9r).
 The model architecture and training code builds on a code base on [spirl](https://github.com/clvrai/spirl).
 
 ## Requirements
@@ -34,10 +36,12 @@ export DATA_DIR=./data
 Finally, install **spirl'sfork** of the [D4RL benchmark](https://github.com/kpertsch/d4rl) repository by following its installation instructions.
 It will provide both, the kitchen environment as well as the training data for the skill prior model in kitchen and maze environment.
 
-## Example Commands
+## Train your own model
 All results will be written to [WandB](https://www.wandb.com/). Before running any of the commands below, 
 create an account and then change the WandB entity and project name at the top of [train.py](spirl/train.py) and
 [rl/train.py](spirl/rl/train.py) to match your account.
+
+For dataset downloading, check [link](https://drive.google.com/file/d/1kWYy9L4w2lLXXzMH1bvUbk6NLFphMmDD/view?usp=drive_link) and put it under `spirl/codebook/`.
 
 First you need to generate codebook using [generate_codebook.py](generate_codebook.py), codebook will be put at [spirl/codebook](spirl/codebook).You can adjust codebook size and code dim in [generate_codebook.py](generate_codebook.py), default parameter is 50 code in codebook and 21 dim for each code.
 
