@@ -55,7 +55,7 @@ To train a low level policy (predict $a$ using $s$ and $g$), run:
 ```
 python3 spirl/train.py --path=spirl/configs/ptgm/kitchen/steve --val_data_size=160
 ```
-Default state dim is 60, action dim is 9 and goal dim is 21 (size of code in codebook). The config is at [spirl/configs/mc/kitchen/steve/conf.py](spirl/configs/mc/kitchen/steve/conf.py)
+Default state dim is 60, action dim is 9 and goal dim is 21 (size of code in codebook). The config is at [spirl/configs/ptgm/kitchen/steve/conf.py](spirl/configs/ptgm/kitchen/steve/conf.py)
 
 Finally for RL training, you can change the config and model path in [spirl/configs/hrl/kitchen/steve/conf.py](spirl/configs/hrl/kitchen/steve/conf.py), run:
 ```
@@ -137,7 +137,7 @@ spirl
   |- configs               # all experiment configs should be placed here
   |    |- data_collect     # configs for data collection runs
   |    |- default_data_configs   # defines one default data config per dataset, e.g. state/action dim etc
-  |    |- mc               # configs for our prior model and low-level policy
+  |    |- ptgm             # configs for our prior model and low-level policy
   |    |- hrl              # configs for hierarchical downstream RL
   |    |    |- steve       # configs for our method
   |    |- rl               # configs for non-hierarchical downstream RL
