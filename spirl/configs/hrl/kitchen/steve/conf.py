@@ -17,7 +17,7 @@ prior_model_config = AttrDict(
     action_dim=50,
     n_layers=5,
     hidden_size=128,
-    model_checkpoint = '/home/yhq/Desktop/spirl-master/experiments/mc/kitchen/prior/prior_50/weights/weights_ep4.pth',
+    model_checkpoint = './experiments/mc/kitchen/prior/weights/weights_ep140.pth',
 )
 
 ll_model_params = AttrDict(
@@ -68,7 +68,7 @@ agent_config.hl_agent_params.update(AttrDict(
 ll_agent_config.update(AttrDict(
     model=Steve,
     model_params=ll_model_params,
-    model_checkpoint='experiments/mc/kitchen/steve/20_21_steve/weights/weights_ep80.pth',
+    model_checkpoint='./experiments/mc/kitchen/steve/weights/weights_ep120.pth',
 ))
 
 hl_policy_params.update(AttrDict(
@@ -80,11 +80,3 @@ agent_config.update(AttrDict(
     ll_agent = GoalBasedAgent,
     ll_agent_params = ll_agent_config,
 ))
-
-# import pickle
-# with open("test_conf.pkl",'wb') as f:
-#     pickle.dump(ll_agent_config, f)
-
-# import pickle
-# with open("test_prior.pkl",'wb') as f:
-#     pickle.dump(prior_model_config, f)
