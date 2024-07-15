@@ -58,7 +58,6 @@ class PriorInitializedPolicy(Policy):
 
     @staticmethod
     def update_model_params(params):
-        # TODO: the device could be set to cpu even if GPU available
         params.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         params.batch_size = 1            # run only single-element batches for forward pass
 
@@ -75,7 +74,6 @@ class PriorAugmentedPolicy(Policy):
         policy_output = super().forward(obs)
         if not self._rollout_mode:
             raw_prior_divergence, policy_output.prior_dist = self._compute_prior_divergence(policy_output, obs)
-            # print(f"raw_prior_divergence = {raw_prior_divergence}")
             policy_output.prior_divergence = self.clamp_divergence(raw_prior_divergence)
         return policy_output
 
@@ -95,7 +93,6 @@ class LearnedPriorAugmentedPolicy(PriorAugmentedPolicy):
         if self._hp.prior_batch_size > 0:
             self._hp.prior_model_params.batch_size = self._hp.prior_batch_size
         self.prior_net = self._hp.prior_model(self._hp.prior_model_params, None)
-        # print(f"self.prior_net = {self.prior_net}")
         BaseAgent.load_model_weights(self.prior_net, self._hp.prior_model_checkpoint, self._hp.prior_model_epoch)
 
     def _default_hparams(self):
@@ -113,11 +110,7 @@ class LearnedPriorAugmentedPolicy(PriorAugmentedPolicy):
 
     def _compute_prior_divergence(self, policy_output, obs):
         with no_batchnorm_update(self.prior_net):
-            # prior_dist = self.prior_net.compute_learned_prior(obs, first_only=True).softmax(dim=-1).detach()
-            # print(f"obs = {obs}")
             prior_dist = self.prior_net.compute_learned_prior(obs, first_only=True).detach()
-            # print(f"prior_dist = {prior_dist.mu, prior_dist.sigma}")
-            # print(f"policy_output = {policy_output.dist.mu, policy_output.dist.sigma}")
             if self._hp.reverse_KL:
                 a = prior_dist
                 b = policy_output.dist
@@ -128,20 +121,11 @@ class LearnedPriorAugmentedPolicy(PriorAugmentedPolicy):
             for i in range(a.shape[0]):
                 c[i] = torch.nn.functional.kl_div((a[i] + 1e-8).log(), b[i], reduction='sum')
             return c, prior_dist
-            # print(f"self._hp.analytic_KL = {self._hp.analytic_KL}")
-            # return self._analytic_divergence(policy_output, prior_dist), prior_dist
-            # if self._hp.analytic_KL:
-            #     return self._analytic_divergence(policy_output, prior_dist), prior_dist
-            # return self._mc_divergence(policy_output, prior_dist), prior_dist
 
     def _analytic_divergence(self, policy_output, prior_dist):
         """Analytic KL divergence between two Gaussian distributions."""
         assert isinstance(prior_dist, MultivariateGaussian) and isinstance(policy_output.dist, MultivariateGaussian)
         return policy_output.dist.kl_divergence(prior_dist).sum(dim=-1)
-        # if self._hp.reverse_KL:
-        #     return prior_dist.kl_divergence(policy_output.dist).sum(dim=-1)
-        # else:
-        #     return policy_output.dist.kl_divergence(prior_dist).sum(dim=-1)
 
     def _mc_divergence(self, policy_output, prior_dist):
         """Monte-Carlo KL divergence estimate."""
