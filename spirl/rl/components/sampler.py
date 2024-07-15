@@ -1,11 +1,15 @@
 import numpy as np
 import contextlib
 from collections import deque
+import pickle
 
 from spirl.utils.general_utils import listdict2dictlist, AttrDict, ParamDict, obj2np
 from spirl.modules.variational_inference import MultivariateGaussian
 from spirl.rl.utils.reward_fcns import sparse_threshold
 
+
+highlevel_idx = []
+env_sstep = []
 
 class Sampler:
     """Collects rollouts from the environment using the given agent."""
@@ -155,7 +159,6 @@ class HierarchicalSampler(Sampler):
                         agent_output = self._postprocess_agent_output(agent_output)
                         obs, reward, done, info = self._env.step(agent_output.action)
                         obs = self._postprocess_obs(obs)
-
                         # update last step's 'observation_next' with HL action
                         if store_ll:
                             if ll_experience_batch:
@@ -170,26 +173,38 @@ class HierarchicalSampler(Sampler):
                                 action=agent_output.action,
                                 observation_next=obs,       # this will get updated in the next step
                             ))
-
                         # store HL experience batch if this was HL action or episode is done
                         if agent_output.is_hl_step or (done or self._episode_step >= self._max_episode_len-1):
                             if self.last_hl_obs is not None and self.last_hl_action is not None:
+                                
                                 hl_experience_batch.append(AttrDict(
                                     observation=self.last_hl_obs,
                                     reward=self.reward_since_last_hl,
                                     done=done,
-                                    action=self.last_hl_log_prob,
-                                    idx=agent_output.hl_idx.detach().cpu().numpy(),
+                                    action=agent_output.hl_action, 
+                                    log_prob = agent_output.hl_log_prob.detach().cpu().numpy(),
+                                    # log_prob = agent_output.hl_log_prob,
+                                    prob = agent_output.hl_prob.detach().cpu().numpy(),
+                                    # prob = agent_output.hl_prob,
+                                    idx = agent_output.hl_idx.detach().cpu().numpy(),
                                     observation_next=obs,
                                 ))
+                                highlevel_idx.append(agent_output.hl_idx.detach().cpu().numpy().copy())
+                                env_sstep.append(self._episode_step)
                                 hl_step += 1
+                                # print(f"env_step = {self._episode_step}")
                                 if done:
                                     hl_experience_batch[-1].reward += reward  # add terminal reward
+                                with open("./highlevel_idx.pickle","wb") as f:
+                                    pickle.dump(highlevel_idx,f)
+                                with open("./env_sstep.pickle","wb") as f:
+                                    pickle.dump(env_sstep,f) 
                                 if hl_step % 1000 == 0:
                                     print("Sample step {}".format(hl_step))
                             self.last_hl_obs = self._obs if self._episode_step == 0 else obs
                             self.last_hl_action = agent_output.hl_action
-                            self.last_hl_log_prob = agent_output.hl_log_prob.detach().cpu().numpy()
+                            self.last_hl_log_prob = agent_output.hl_log_prob
+                            self.last_hl_prob = agent_output.hl_prob
                             self.reward_since_last_hl = 0
 
                         # update stored observation

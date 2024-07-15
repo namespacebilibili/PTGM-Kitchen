@@ -22,18 +22,23 @@ class Policy(nn.Module):
         return default_dict
 
     def forward(self, obs):
-        output_dist = self._compute_action_dist(obs)
+        output_dist = self._compute_action_dist(obs) # (N, 100) distribution
         action_dist = torch.distributions.Categorical(output_dist)
         idx = action_dist.sample()
         onehot = torch.zeros((output_dist.shape))
         onehot[:,idx] = 1
         action = onehot
-        log_prob = output_dist
+        log_prob = (output_dist + 1e-8).log()
+        nan_hook(action); nan_hook(log_prob)
+        entropy = -torch.sum(log_prob * output_dist, dim=-1, keepdim=True)
+        return AttrDict(action=action, idx=idx, log_prob=log_prob, prob=output_dist, dist = output_dist, entropy=entropy)
+        # output_dist = self._compute_action_dist(obs)
+        # action = output_dist.rsample()
+        # log_prob = output_dist.log_prob(action)
         # if self._hp.squash_output_dist:
         #     action, log_prob = self._tanh_squash_output(action, log_prob)
-        nan_hook(action)
-        nan_hook(log_prob)
-        return AttrDict(action=action, idx=idx, log_prob=log_prob, dist=output_dist)
+        # nan_hook(action); nan_hook(log_prob)
+        # return AttrDict(action=action, log_prob=log_prob, dist=output_dist)
 
     def _build_network(self):
         """Constructs the policy network."""
@@ -46,7 +51,7 @@ class Policy(nn.Module):
         """Passes continuous output through a tanh function to constrain action range, adjusts log_prob."""
         action_new = self._hp.max_action_range * torch.tanh(action)
         log_prob_update = np.log(self._hp.max_action_range) + 2 * (np.log(2.) - action -
-                                                                   torch.nn.functional.softplus(-2. * action)).sum(dim=-1)  # maybe more stable version from Youngwoon Lee
+              torch.nn.functional.softplus(-2. * action)).sum(dim=-1)  # maybe more stable version from Youngwoon Lee
         return action_new, log_prob - log_prob_update
 
     @property

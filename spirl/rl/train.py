@@ -35,8 +35,7 @@ class RLTrainer:
         print('using log dir: ', log_dir)
 
         # set seeds, display, worker shutdown
-        if args.seed != -1:
-            self._hp.seed = args.seed   # override from command line if set
+        if args.seed != -1: self._hp.seed = args.seed   # override from command line if set
         set_seeds(self._hp.seed)
         os.environ["DISPLAY"] = ":1"
         set_shutdown_hooks()
@@ -51,10 +50,8 @@ class RLTrainer:
 
         # build env
         self.conf.env.seed = self._hp.seed
-        if 'task_params' in self.conf.env:
-            self.conf.env.task_params.seed=self._hp.seed
-        if 'general' in self.conf:
-            self.conf.general.seed=self._hp.seed
+        if 'task_params' in self.conf.env: self.conf.env.task_params.seed=self._hp.seed
+        if 'general' in self.conf: self.conf.general.seed=self._hp.seed
         self.env = self._hp.environment(self.conf.env)
         self.conf.agent.env_params = self.env.agent_params      # (optional) set params from env for agent
         if self.is_chef:
@@ -198,7 +195,7 @@ class RLTrainer:
         with self.agent.rand_act_mode():
             self.sampler.init(is_train=True)
             warmup_experience_batch, _ = self.sampler.sample_batch(
-                batch_size=int(self._hp.n_warmup_steps / self.conf.mpi.num_workers))
+                    batch_size=int(self._hp.n_warmup_steps / self.conf.mpi.num_workers))
             if self.use_multiple_workers:
                 warmup_experience_batch = mpi_gather_experience(warmup_experience_batch)
         if self.is_chef:
@@ -279,8 +276,8 @@ class RLTrainer:
         # self.device = torch.device('cuda') if self.use_cuda else torch.device('cpu')
         # if self.args.gpu != -1:
         #     os.environ["CUDA_VISIBLE_DEVICES"] = str(self.args.gpu)
-        self.device = torch.device('cuda:0') if torch.cuda.is_available() else "cpu"
-        self.use_cuda = bool(torch.cuda.is_available())
+        self.device = torch.device('cuda:0')
+        self.use_cuda = True
 
     def resume(self, ckpt, path=None):
         path = os.path.join(self._hp.exp_path, 'weights') if path is None else os.path.join(path, 'weights')
@@ -300,24 +297,24 @@ class RLTrainer:
                                   self._hp.exp_path))
         print('Train Epoch: {} [It {}/{} ({:.0f}%)]'.format(
             epoch, self.global_step, self._hp.n_steps_per_epoch * self._hp.num_epochs,
-            100. * self.global_step / (self._hp.n_steps_per_epoch * self._hp.num_epochs)))
+                                     100. * self.global_step / (self._hp.n_steps_per_epoch * self._hp.num_epochs)))
         print('avg time for rollout: {:.2f}s, update: {:.2f}s, logs: {:.2f}s, total: {:.2f}s'
               .format(timers['rollout'].avg, timers['update'].avg, timers['log'].avg,
                       timers['rollout'].avg + timers['update'].avg + timers['log'].avg))
         togo_train_time = timers['batch'].avg * (self._hp.num_epochs * self._hp.n_steps_per_epoch - self.global_step) \
-            / self._hp.n_steps_per_update / 3600.
+                          / self._hp.n_steps_per_update / 3600.
         print('ETA: {:.2f}h'.format(togo_train_time))
 
     @property
     def log_outputs_now(self):
-        return self.n_update_steps % int((self._hp.n_steps_per_epoch / self._hp.n_steps_per_update) /
-                                         self._hp.log_output_per_epoch) == 0 \
-            or self.log_images_now
+        return self.n_update_steps % int((self._hp.n_steps_per_epoch / self._hp.n_steps_per_update)
+                                       / self._hp.log_output_per_epoch) == 0 \
+                    or self.log_images_now
 
     @property
     def log_images_now(self):
-        return self.n_update_steps % int((self._hp.n_steps_per_epoch / self._hp.n_steps_per_update) /
-                                         self._hp.log_images_per_epoch) == 0
+        return self.n_update_steps % int((self._hp.n_steps_per_epoch / self._hp.n_steps_per_update)
+                                       / self._hp.log_images_per_epoch) == 0
 
     @property
     def is_chef(self):

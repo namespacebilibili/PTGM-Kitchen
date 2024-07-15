@@ -28,13 +28,21 @@ class ActionPriorSACAgent(SACAgent):
 
     def _compute_alpha_loss(self, policy_output):
         """Computes loss for alpha update based on target divergence."""
+        # print(f"self.alpha = {self.alpha}")
+        # print(f"target_divergence = {self._target_divergence(self.schedule_steps)}")
+        # print(f"policy_output.prior_divergence = {policy_output.prior_divergence}")
+        
         return self.alpha * (self._target_divergence(self.schedule_steps) - policy_output.prior_divergence).detach().mean()
 
     def _compute_policy_loss(self, experience_batch, policy_output):
         """Computes loss for policy update."""
         q_est = torch.min(*[critic(experience_batch.observation, self._prep_action(policy_output.action)).q
                             for critic in self.critics])
+        # print(f"self.critic = {self.critics}")
+        # print(f"q_est.shape = {q_est.shape}")
         policy_loss = -1 * q_est + self.alpha * policy_output.prior_divergence[:, None]
+        # print(f"policy_output = {policy_output}")
+        # print(f"policy_output.action.shape = {policy_output.action.shape}")
         check_shape(policy_loss, [self._hp.batch_size, 1])
         return policy_loss.mean()
 
@@ -42,7 +50,9 @@ class ActionPriorSACAgent(SACAgent):
         """Computes value of next state for target value computation."""
         q_next = torch.min(*[critic_target(experience_batch.observation_next, self._prep_action(policy_output.action)).q
                              for critic_target in self.critic_targets])
+        # print(f"q_next.shape = {q_next}")
         next_val = (q_next - self.alpha * policy_output.prior_divergence[:, None])
+        # print(f"next_val = {next_val}")
         check_shape(next_val, [self._hp.batch_size, 1])
         return next_val.squeeze(-1)
 
@@ -114,24 +124,31 @@ class CodebookBasedActionPriorSACAgent(ActionPriorSACAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.get_codebook = self._hp.codebook
+
     def act(self, obs):
         obs = map2torch(self._obs_normalizer(obs), self._hp.device)
         if len(obs.shape) == 1:
             output = self.policy.net._compute_output_dist(obs[None])
         else:
             output = self.policy.net._compute_output_dist(obs)
+
+
+        
         action_dist = torch.distributions.Categorical(output)
         code_idx = action_dist.sample()
         one_hot = torch.zeros((output.shape))
         one_hot[:, code_idx] = 1
         policy_output = self.get_codebook()[code_idx] # choose code
-        return AttrDict(action=policy_output, idx=code_idx, log_prob=output)
+        return AttrDict(action=policy_output, idx=code_idx, log_prob=(output + 1e-8).log(), prob=output)
 
     def _compute_policy_loss(self, experience_batch, policy_output):
         """Computes loss for policy update."""
-        q_est = torch.min(*[critic(experience_batch.observation).q.gather(1, self._prep_action(policy_output.idx).type(torch.int64).to("cuda:0"))
+        q_est = torch.min(*[critic(experience_batch.observation).q
                             for critic in self.critics])
-        policy_loss = -1 * q_est + self.alpha * policy_output.prior_divergence.to("cuda:0")
+        q_value = torch.sum(policy_output.prob * q_est, dim=-1, keepdim=True)
+        # entropy = -torch.sum(policy_output.log_prob * policy_output.prob, dim=1, keepdim=True).to("cuda:0")
+        policy_loss = -1 * q_value + self.alpha * policy_output.prior_divergence.to("cuda:0")
+        # policy_loss = -1 * q_est - self.alpha * policy_output.entropy.to("cuda:0")
         check_shape(policy_loss, [self._hp.batch_size, 1])
         return policy_loss.mean()
 
@@ -139,7 +156,9 @@ class CodebookBasedActionPriorSACAgent(ActionPriorSACAgent):
         """Computes value of next state for target value computation."""
         q_next = torch.min(*[critic_target(experience_batch.observation_next).q.gather(1,self._prep_action(policy_output.idx).type(torch.int64).to("cuda:0"))
                              for critic_target in self.critic_targets])
+        # entropy = -torch.sum(policy_output.log_prob * policy_output.prob, dim=1, keepdim=True).to("cuda:0")
         next_val = q_next - self.alpha * policy_output.prior_divergence.to("cuda:0")
+        # next_val = q_next + self.alpha * policy_output.entropy.to("cuda:0")
         check_shape(next_val, [self._hp.batch_size, 1])
         return next_val.squeeze(-1)
 
@@ -147,4 +166,5 @@ class CodebookBasedActionPriorSACAgent(ActionPriorSACAgent):
         return [critic(experience_batch.observation).q.squeeze(-1).gather(1,self._prep_action(experience_batch.idx).type(torch.int64).to("cuda:0").detach()).squeeze()
                 for critic in self.critics]     # no gradient propagation into policy here!
 
-
+    # def _compute_alpha_loss(self, policy_output):
+    #     return -1 * (self.alpha * (self._target_divergence(self.schedule_steps) - policy_output.entropy.to("cuda:0")).detach()).mean()

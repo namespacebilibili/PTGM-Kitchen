@@ -123,7 +123,7 @@ class SACAgent(ACAgent):
 
             # update alpha
             alpha_loss = self._update_alpha(experience_batch, policy_output)
-
+            # print(f"alpha_loss = {alpha_loss}")
             # compute policy loss
             policy_loss = self._compute_policy_loss(experience_batch, policy_output)
 
@@ -168,7 +168,7 @@ class SACAgent(ACAgent):
             info.update(AttrDict(       # misc
                 alpha=self.alpha,
                 pi_log_prob=policy_output.log_prob.mean(),
-                # policy_entropy=policy_output.dist.entropy().mean(),
+                policy_entropy=policy_output.entropy.mean(),
                 q_target=q_target.mean(),
                 q_1=qs[0].mean(),
                 q_2=qs[1].mean(),
@@ -211,6 +211,7 @@ class SACAgent(ACAgent):
         return -1 * (self.alpha * (self._target_entropy + policy_output.action).detach()).mean()
 
     def _compute_policy_loss(self, experience_batch, policy_output):
+        # print(f"self.critics = {self.critics}")
         q_est = torch.min(*[critic(experience_batch.observation, self._prep_action(policy_output.action)).q
                                       for critic in self.critics])
         policy_loss = -1 * q_est + self.alpha * policy_output.log_prob[:, None]
@@ -237,7 +238,7 @@ class SACAgent(ACAgent):
     def _prep_action(self, action):
         """Preprocessing of action in case of discrete action space."""
         if len(action.shape) == 1: action = action[:, None]  # unsqueeze for single-dim action spaces
-        return action.float()
+        return action #.float()
 
     def _clip_q_target(self, q_target):
         clip = 1 / (1 - self._hp.discount_factor)
@@ -278,3 +279,42 @@ class SACAgent(ACAgent):
     @property
     def schedule_steps(self):
         return self._update_steps
+
+class CodebookBasedSACAgent(SACAgent):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.get_codebook = self._hp.codebook
+
+    def act(self, obs):
+        obs = map2torch(self._obs_normalizer(obs), self._hp.device)
+        if len(obs.shape) == 1:
+            output = self.policy.net._compute_output_dist(obs[None])
+        else:
+            output = self.policy.net._compute_output_dist(obs)
+        # output = output.softmax(dim = -1)
+        action_dist = torch.distributions.Categorical(output)
+        code_idx = action_dist.sample()
+        one_hot = torch.zeros((output.shape))
+        one_hot[:, code_idx] = 1
+        policy_output = self.get_codebook()[code_idx] # choose code
+        return AttrDict(action=policy_output, idx=code_idx, log_prob=output) # warning: log_prob
+    
+    def _compute_policy_loss(self, experience_batch, policy_output):
+        """Computes loss for policy update."""
+        q_est = torch.min(*[critic(experience_batch.observation).q.gather(1, self._prep_action(policy_output.idx).type(torch.int64).to("cuda:0"))
+                                      for critic in self.critics])
+        policy_loss = -1 * q_est + self.alpha * policy_output.log_prob.to("cuda:0")
+        check_shape(policy_loss, [self._hp.batch_size, 1])
+        return policy_loss.mean()
+    
+    def _compute_next_value(self, experience_batch, policy_output):
+        """Computes value of next state for target value computation."""
+        q_next = torch.min(*[critic_target(experience_batch.observation_next).q.gather(1,self._prep_action(policy_output.idx).type(torch.int64).to("cuda:0"))
+                             for critic_target in self.critic_targets])
+        next_val = q_next - self.alpha * policy_output.log_prob.to("cuda:0")
+        check_shape(next_val, [self._hp.batch_size, 1])
+        return next_val.squeeze(-1)
+
+    def _compute_q_estimates(self, experience_batch):
+        return [critic(experience_batch.observation).q.squeeze(-1).gather(1,self._prep_action(experience_batch.idx).type(torch.int64).to("cuda:0").detach()).squeeze()
+                    for critic in self.critics]     # no gradient propagation into policy here!

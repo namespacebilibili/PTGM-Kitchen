@@ -136,7 +136,11 @@ class BaseAgent(nn.Module):
         opt.zero_grad()
         loss.backward()
 
+        torch.nn.utils.clip_grad_norm_(parameters=network.parameters(), max_norm=10, norm_type=2)
+        # for name, parms in network.named_parameters():	
+        #     print('-->name:', name, '-->grad_requirs:',parms.requires_grad,' -->grad_value:',parms.grad)
         grads = [p.grad for p in network.parameters()]
+        # print(f"grads = {grads}")
         nan_hook(grads)
 
         opt.step()
@@ -232,6 +236,7 @@ class HierarchicalAgent(BaseAgent):
         if self._perform_hl_step_now:
             # perform step with high-level policy
             self._last_hl_output = self.hl_agent.act(obs_input)
+            # print(f"self._last_hl_output = {self._last_hl_output}")
             output.is_hl_step = True
             if len(obs_input.shape) == 2 and len(self._last_hl_output.action.shape) == 1:
                 self._last_hl_output.action = self._last_hl_output.action[None]  # add batch dim if necessary
