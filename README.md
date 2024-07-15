@@ -57,7 +57,7 @@ python3 spirl/train.py --path=spirl/configs/mc/kitchen/steve --val_data_size=160
 ```
 Default state dim is 60, action dim is 9 and goal dim is 21 (size of code in codebook). The config is at [spirl/configs/mc/kitchen/steve/conf.py](spirl/configs/mc/kitchen/steve/conf.py)
 
-Finally for RL training, run:
+Finally for RL training, you can change the config and model path in [spirl/configs/hrl/kitchen/steve/conf.py](spirl/configs/hrl/kitchen/steve/conf.py) run:
 ```
 python3 spirl/rl/train.py --path=spirl/configs/hrl/kitchen/steve --seed=0 --prefix=SPIRL_kitchen_seed0
 ```
