@@ -17,7 +17,7 @@ prior_model_config = AttrDict(
     action_dim=50,
     n_layers=5,
     hidden_size=128,
-    model_checkpoint = './experiments/mc/kitchen/prior/weights/weights_ep140.pth',
+    model_checkpoint = './experiments/ptgm/kitchen/prior/weights/weights_ep140.pth',
 )
 
 ll_model_params = AttrDict(
@@ -68,7 +68,7 @@ agent_config.hl_agent_params.update(AttrDict(
 ll_agent_config.update(AttrDict(
     model=Steve,
     model_params=ll_model_params,
-    model_checkpoint='./experiments/mc/kitchen/steve/weights/weights_ep120.pth',
+    model_checkpoint='./experiments/ptgm/kitchen/steve/weights/weights_ep120.pth',
 ))
 
 hl_policy_params.update(AttrDict(
