@@ -1,1 +1,0 @@
-{"train/gradients/max_norm": 0.7713936567306519, "train/gradients/mean_norm": 0.1976958066225052, "_step": 247000, "_runtime": 24114.886032104492, "_timestamp": 1694718491.2137842, "train/total_loss": 1.031256914138794, "train/crossentropy_loss": 1.031256914138794, "val/crossentropy_loss": 1.2521547079086304, "val/total_loss": 1.2521547079086304}
