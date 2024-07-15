@@ -49,7 +49,7 @@ Then to train a prior model, run:
 ```
 python3 spirl/train.py --path=spirl/configs/ptgm/kitchen/prior --val_data_size=160
 ```
-The config is at [spirl/configs/mc/kitchen/prior/conf.py](spirl/configs/mc/kitchen/prior/conf.py). To match the codebook size, you should adjust codebook path, and `action_dim` of `data_spec_prior` in [spirl/configs/default_data_configs/kitchen.py][spirl/configs/default_data_configs/kitchen.py]
+The config is at [spirl/configs/ptgm/kitchen/prior/conf.py](spirl/configs/ptgm/kitchen/prior/conf.py). To match the codebook size, you should adjust codebook path, and `action_dim` of `data_spec_prior` in [spirl/configs/default_data_configs/kitchen.py][spirl/configs/default_data_configs/kitchen.py]
 
 To train a low level policy (predict $a$ using $s$ and $g$), run:
 ```
