@@ -47,13 +47,13 @@ First you need to generate codebook using [generate_codebook.py](generate_codebo
 
 Then to train a prior model, run:
 ```
-python3 spirl/train.py --path=spirl/configs/mc/kitchen/prior --val_data_size=160
+python3 spirl/train.py --path=spirl/configs/ptgm/kitchen/prior --val_data_size=160
 ```
 The config is at [spirl/configs/mc/kitchen/prior/conf.py](spirl/configs/mc/kitchen/prior/conf.py). To match the codebook size, you should adjust codebook path, and `action_dim` of `data_spec_prior` in [spirl/configs/default_data_configs/kitchen.py][spirl/configs/default_data_configs/kitchen.py]
 
 To train a low level policy (predict $a$ using $s$ and $g$), run:
 ```
-python3 spirl/train.py --path=spirl/configs/mc/kitchen/steve --val_data_size=160
+python3 spirl/train.py --path=spirl/configs/ptgm/kitchen/steve --val_data_size=160
 ```
 Default state dim is 60, action dim is 9 and goal dim is 21 (size of code in codebook). The config is at [spirl/configs/mc/kitchen/steve/conf.py](spirl/configs/mc/kitchen/steve/conf.py)
 
